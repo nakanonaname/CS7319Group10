@@ -12,7 +12,7 @@ class UILayer:
         self.display_menu_page()
         self.cell_size = 80
 
-        self._player_management_layer = GameSessionLayer()
+        self._game_session_layer = GameSessionLayer()
         self.canvas = None
         self.cells = None
         self.final_result = None
@@ -66,7 +66,7 @@ class UILayer:
 
     def show_game_ui(self, game_mode: GameMode):
         self.clear_window()
-        board = self._player_management_layer.start_game(game_mode)
+        board = self._game_session_layer.start_game(game_mode)
         self.cells = np.zeros((board.width, board.height), dtype=int)
 
         menu_frame = tk.Frame(self.root, bg="white")
@@ -79,7 +79,7 @@ class UILayer:
                                 fg="black",
                                 width=12,
                                 height=1,
-                                command=self.display_menu_page)
+                                command=self.restart)
         btn_restart.pack(side="left", padx=40)
 
         btn_exit = tk.Button(menu_frame,
@@ -119,6 +119,9 @@ class UILayer:
 
         self.display_board()
 
+    def restart(self):
+        self.show_game_ui(self._game_session_layer.game_mode)
+
     def display_board(self):
         for x in range(len(self.cells[0])):
             for y in range(len(self.cells)):
@@ -132,7 +135,7 @@ class UILayer:
         x = event.x // self.cell_size
 
         if 0 <= x <= len(self.cells[0]):
-            move_result = self._player_management_layer.move(x)
+            move_result = self._game_session_layer.move(x)
             for (x, y, player) in move_result.moves:
                 fill = "red" if player == PLAYER_1 else "yellow"
                 self.canvas.itemconfig(self.cells[x, y], fill=fill)
@@ -143,7 +146,7 @@ class UILayer:
 
     def display_end_page(self):
         self.clear_window()
-        board = self._player_management_layer.end_game()
+        board = self._game_session_layer.end_game()
         self.cells = np.zeros((board.width, board.height), dtype=int)
 
         label = tk.Label(self.root,

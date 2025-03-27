@@ -30,12 +30,17 @@ class MoveResult:
 
 class GameSessionLayer:
     def __init__(self):
-        self._current_player = PLAYER_1
+        self._current_player = None  # set when game is started
         self._game_mode = None  # set when game is started
         self._game = GameLayer()
 
+    @property
+    def game_mode(self):
+        return self._game_mode
+
     def start_game(self, game_mode: GameMode) -> Board:
         self._game_mode = game_mode
+        self._current_player = PLAYER_1
         return self._game.reset_board()
 
     def end_game(self) -> Board:
