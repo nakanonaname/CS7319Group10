@@ -43,6 +43,7 @@ class GameSessionLayer:
         return self._game.reset_board()
 
     def restart_game(self) -> Board:
+        self._current_player = PLAYER_1
         return self._game.reset_board()
 
     def move(self, x: int) -> MoveResult:
