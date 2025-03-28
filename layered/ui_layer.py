@@ -2,72 +2,84 @@ import tkinter as tk
 import numpy as np
 from game_session_layer import GameSessionLayer, GameMode, PLAYER_1, MoveResult
 
+FONT = "Helvetica"
 
 class UILayer(tk.Frame):
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Connect 4 - Layered")
-        self.root.geometry("500x500")
-        self.display_menu_page()
-        self.cell_size = 50
-        self.cell_padding = 10
 
+        # initiate adjacent layer
         self._game_session_layer = GameSessionLayer()
-        self.player_turn_label = None
+
+        # menu page fields/components
+        self.game_mode_var = None
+
+        # game board fields/components
         self.canvas = None
         self.cells = None
+        self.cell_size = 50
+        self.cell_padding = 10
+        self.player_turn_label = None
 
     def display_menu_page(self):
+        """Display menu page with options to start a game"""
+
         self.clear_window()
+        self.root.geometry("500x500")
 
         title_frame = tk.Frame(self.root)
         title_frame.pack(pady=20)
 
+        # Connect-4 title
         title_connect = tk.Label(title_frame,
                                  text="Connect",
                                  fg="red",
-                                 font=("Helvetica", 24, "bold"))
+                                 font=(FONT, 24, "bold"))
         title_connect.pack(side=tk.LEFT)
-
         title_four = tk.Label(title_frame,
                               text="-4",
                               fg="yellow",
-                              font=("Helvetica", 24, "bold"))
+                              font=(FONT, 24, "bold"))
         title_four.pack(side=tk.LEFT)
 
+        # Choose opponent radios
         label = tk.Label(self.root,
                          text="Choose your opponent:",
-                         font=("Helvetica", 14))
+                         font=(FONT, 14))
         label.pack(pady=20)
 
         radio_frame = tk.Frame(self.root)
         radio_frame.pack(pady=10)
 
-        self.game_mode_var = tk.StringVar(value="SINGLEPLAYER")
+        self.game_mode_var = tk.StringVar(value="SINGLE_PLAYER")
         ai_radio_btn = tk.Radiobutton(radio_frame,
                                       text="Monte Carlo AI",
                                       variable=self.game_mode_var,
                                       value="SINGLE_PLAYER",
-                                      font=("Helvetica", 12))
+                                      font=(FONT, 12))
         ai_radio_btn.pack(anchor=tk.W, pady=5)
         multi_player_btn = tk.Radiobutton(radio_frame,
                                           text="2 Players",
                                           variable=self.game_mode_var,
                                           value="MULTIPLAYER",
-                                          font=("Helvetica", 12))
+                                          font=(FONT, 12))
         multi_player_btn.pack(anchor=tk.W, pady=5)
 
-        start_button = tk.Button(self.root,
+        start_btn = tk.Button(self.root,
                                  text="Start Game",
-                                 font=("Helvetica", 14),
-                                 command=self.start_game)
-        start_button.pack(pady=20)
+                                 font=(FONT, 14),
+                                 command=self.handle_start_click)
+        start_btn.pack(pady=20)
 
-    def start_game(self):
-        game_mode = GameMode.SINGLE_PLAYER if self.game_mode_var.get() == "SINGLE_PLAYER" else GameMode.MULTI_PLAYER
-        self.show_game_ui(game_mode=game_mode)
+    def handle_start_click(self):
+        # transform radio button TextVar to GameMode enum
+        game_mode_text = self.game_mode_var.get()
+        game_mode = GameMode.SINGLE_PLAYER if game_mode_text == "SINGLE_PLAYER" else GameMode.MULTI_PLAYER
 
-    def show_game_ui(self, game_mode: GameMode):
+        self.display_game(game_mode=game_mode)
+
+    def display_game(self, game_mode: GameMode):
         self.clear_window()
 
         self.root.geometry("670x400")
@@ -97,7 +109,7 @@ class UILayer(tk.Frame):
 
         btn_start_game = tk.Button(menu_frame,
                                    text="Start New Game",
-                                   font=("Arial", 16),
+                                   font=(FONT, 16),
                                    bg="white",
                                    width=12,
                                    height=1,
@@ -106,11 +118,11 @@ class UILayer(tk.Frame):
 
         btn_restart = tk.Button(menu_frame,
                                 text="Restart Game",
-                                font=("Arial", 16),
+                                font=(FONT, 16),
                                 bg="white",
                                 width=12,
                                 height=1,
-                                command=self.restart)
+                                command=self.handle_restart_click)
         btn_restart.pack(pady=10)
 
         spacer = tk.Frame(menu_frame)
@@ -120,7 +132,7 @@ class UILayer(tk.Frame):
             self.player_turn_label = tk.Label(
                 menu_frame,
                 text="Player Turn: Player 1",
-                font=("Arial", 10),
+                font=(FONT, 10),
                 justify=tk.LEFT
             )
             self.player_turn_label.pack(side=tk.BOTTOM, pady=15)
@@ -128,7 +140,7 @@ class UILayer(tk.Frame):
         player_legend_yellow_text = tk.Label(
             menu_frame,
             text="Player 2" if self._game_session_layer.is_multiplayer else "Monte Carlo AI",
-            font=("Arial", 10),
+            font=(FONT, 10),
             fg="yellow",
             justify=tk.LEFT
         )
@@ -137,7 +149,7 @@ class UILayer(tk.Frame):
         player_legend_red_text = tk.Label(
             menu_frame,
             text="Player 1",
-            font=("Arial", 10),
+            font=(FONT, 10),
             highlightcolor="red",
             fg="red",
             justify=tk.LEFT
@@ -146,8 +158,8 @@ class UILayer(tk.Frame):
 
         self.display_board()
 
-    def restart(self):
-        self.show_game_ui(self._game_session_layer.game_mode)
+    def handle_restart_click(self):
+        self.display_game(self._game_session_layer.game_mode)
 
     def update_player_turn_label(self):
         current = "Player 1" if self._game_session_layer.current_player == PLAYER_1 else "Player 2"
@@ -186,26 +198,26 @@ class UILayer(tk.Frame):
 
         label = tk.Label(self.root,
                          text="Game Over",
-                         font=("Arial", 28),
+                         font=(FONT, 28),
                          fg="black")
         label.pack(pady=30)
 
         if result.is_draw:
             text = "Draw!"
-        elif result.game_mode == GameMode.MULTI_PLAYER:
+        elif self._game_session_layer.game_mode == GameMode.MULTI_PLAYER:
             text = "Player 1 Wins!" if result.winner == PLAYER_1 else "Player 2 Wins!"
         else:
             text = "You Win!" if result.winner == PLAYER_1 else "You Lose!"
 
         winner_label = tk.Label(self.root,
                                 text=text,
-                                font=("Arial", 22),
+                                font=(FONT, 22),
                                 fg="red" if result.winner == PLAYER_1 else "yellow")
         winner_label.pack(pady=10)
 
         start_btn = tk.Button(self.root,
                                 text="Start New Game",
-                                font=("Arial", 18),
+                                font=(FONT, 18),
                                 bg="white",
                                 fg="black",
                                 width=15,
@@ -215,12 +227,12 @@ class UILayer(tk.Frame):
 
         replay_btn = tk.Button(self.root,
                              text="Replay",
-                             font=("Arial", 18),
+                             font=(FONT, 18),
                              bg="white",
                              fg="black",
                              width=15,
                              height=2,
-                             command=self.restart)
+                             command=self.handle_restart_click)
         replay_btn.pack(pady=15)
 
     def clear_window(self):
@@ -228,8 +240,5 @@ class UILayer(tk.Frame):
             widget.destroy()
 
     def draw(self):
+        self.display_menu_page()
         self.root.mainloop()
-
-
-if __name__ == "__main__":
-    UILayer().draw()

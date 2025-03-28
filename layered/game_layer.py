@@ -5,6 +5,7 @@ UNOCCUPIED = 0
 
 
 class Board:
+    """The internal board state used exclusively by Game Layer"""
     def __init__(self, grid):
         self._grid = grid
         self._width = len(self._grid[0])
@@ -30,6 +31,7 @@ class Board:
 
 
 class GameLayer:
+    """Maintains board state and validates moves against game rules"""
     def __init__(self):
         self._dims = (6, 7)
         self._board = Board(np.full(self._dims, UNOCCUPIED, dtype=int))
@@ -113,7 +115,8 @@ class GameLayer:
         return [x for x in range(self._board.width)
                 if np.count_nonzero(self._board.grid[:, x] == UNOCCUPIED) > 0]
 
-    def result(self, player: int, x: int):
+    def simulate_move(self, player: int, x: int):
+        """Simulates a move. Does not modify existing board state"""
         game_copy = GameLayer()
         game_copy._board = self._board.copy()
         game_copy._winner = self._winner

@@ -15,20 +15,21 @@ class GameMode(Enum):
 
 
 class MoveResult:
+    """Data transfer object that encapsulates data sent to UI from Game layer"""
     def __init__(self,
                  winner: int | None,
                  is_draw: bool,
                  is_over: bool,
-                 game_mode: GameMode,
                  moves: list[tuple[int, int, int]]):
         self.winner = winner
         self.is_draw = is_draw
         self.is_over = is_over
-        self.game_mode = game_mode
         self.moves = moves
 
 
 class GameSessionLayer:
+    """Manages player turn and encapsulates AI implementation"""
+
     def __init__(self):
         self._current_player = None  # set when game is started
         self._game_mode = None  # set when game is started
@@ -74,17 +75,11 @@ class GameSessionLayer:
             else:  # switch player
                 self._current_player = PLAYER_2 if self._current_player == PLAYER_1 else PLAYER_1
 
-        return MoveResult(game_mode=self._game_mode,
-                          winner=self._game.winner,
+        return MoveResult(winner=self._game.winner,
                           is_draw=self._game.is_draw,
                           is_over=self._game.is_over,
                           moves=moves)
 
-    ####################
-    # Modified from my project submission for Dr. Hahsler's AI course
-    #       Utilizes UCB1 to find best available available move in 1000 playoffs
-    #       Utility function treats ties as losses
-    ####################
     def _get_ai_move(self) -> int:
         root = {"u": 0, "n": 0}
         leafs = {move: {"u": 0, "n": 0} for move in self._game.open_moves}
@@ -117,7 +112,7 @@ class GameSessionLayer:
         return avg_utility_per_playout + C * playout_quotient
 
     def _simulate(self, player: int, x: int):
-        p_game = self._game.result(player, x)
+        p_game = self._game.simulate_move(player, x)
         while True:
             if p_game.is_over:
                 return 1 if p_game.winner == player else -1
@@ -127,7 +122,7 @@ class GameSessionLayer:
             choice = np.random.randint(len(all_actions))
             next_action = all_actions[choice]
 
-            p_game = p_game.result(PLAYER_2 if player == PLAYER_1 else PLAYER_1, next_action)
+            p_game = p_game.simulate_move(PLAYER_2 if player == PLAYER_1 else PLAYER_1, next_action)
 
     def _choose_best_action(self, leafs):
         # choose leaf w/ most playouts
