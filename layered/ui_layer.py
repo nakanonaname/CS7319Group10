@@ -1,138 +1,171 @@
 import tkinter as tk
 import numpy as np
-from game_session_layer import GameSessionLayer, GameMode, PLAYER_1
+from game_session_layer import GameSessionLayer, GameMode, PLAYER_1, MoveResult
 
 
-class UILayer:
+class UILayer(tk.Frame):
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Connect 4")
-        self.root.geometry("700x800")
-        self.root.configure(bg="white")
+        self.root.title("Connect 4 - Layered")
+        self.root.geometry("500x500")
         self.display_menu_page()
-        self.cell_size = 80
+        self.cell_size = 50
+        self.cell_padding = 10
 
         self._game_session_layer = GameSessionLayer()
+        self.player_turn_label = None
         self.canvas = None
         self.cells = None
-        self.final_result = None
 
     def display_menu_page(self):
         self.clear_window()
 
+        title_frame = tk.Frame(self.root)
+        title_frame.pack(pady=20)
+
+        title_connect = tk.Label(title_frame,
+                                 text="Connect",
+                                 fg="red",
+                                 font=("Helvetica", 24, "bold"))
+        title_connect.pack(side=tk.LEFT)
+
+        title_four = tk.Label(title_frame,
+                              text="-4",
+                              fg="yellow",
+                              font=("Helvetica", 24, "bold"))
+        title_four.pack(side=tk.LEFT)
+
         label = tk.Label(self.root,
-                         text="Connect 4",
-                         font=("Arial", 28),
-                         fg="black",
-                         bg="white")
+                         text="Choose your opponent:",
+                         font=("Helvetica", 14))
+        label.pack(pady=20)
 
-        label.pack(pady=30)
+        radio_frame = tk.Frame(self.root)
+        radio_frame.pack(pady=10)
 
-        btn_two_players = tk.Button(self.root,
-                                    text="Multiplayer",
-                                    font=("Arial", 18),
-                                    bg="white",
-                                    fg="black",
-                                    width=15,
-                                    height=2,
-                                    command=self.display_multiplayer_game_ui)
-        btn_two_players.pack(pady=15)
+        self.game_mode_var = tk.StringVar(value="SINGLEPLAYER")
+        ai_radio_btn = tk.Radiobutton(radio_frame,
+                                      text="Monte Carlo AI",
+                                      variable=self.game_mode_var,
+                                      value="SINGLE_PLAYER",
+                                      font=("Helvetica", 12))
+        ai_radio_btn.pack(anchor=tk.W, pady=5)
+        multi_player_btn = tk.Radiobutton(radio_frame,
+                                          text="2 Players",
+                                          variable=self.game_mode_var,
+                                          value="MULTIPLAYER",
+                                          font=("Helvetica", 12))
+        multi_player_btn.pack(anchor=tk.W, pady=5)
 
-        btn_ai = tk.Button(self.root,
-                           text="AI Player",
-                           font=("Arial", 18),
-                           bg="white",
-                           fg="black",
-                           width=15,
-                           height=2,
-                           command=self.display_single_player_game_ui)
-        btn_ai.pack(pady=15)
+        start_button = tk.Button(self.root,
+                                 text="Start Game",
+                                 font=("Helvetica", 14),
+                                 command=self.start_game)
+        start_button.pack(pady=20)
 
-        btn_exit = tk.Button(self.root,
-                             text="Exit",
-                             font=("Arial", 18),
-                             bg="white",
-                             fg="black",
-                             width=15,
-                             height=2,
-                             command=self.root.quit)
-        btn_exit.pack(pady=30)
-
-    def display_multiplayer_game_ui(self):
-        self.show_game_ui(game_mode=GameMode.MULTI_PLAYER)
-
-    def display_single_player_game_ui(self):
-        self.show_game_ui(game_mode=GameMode.SINGLE_PLAYER)
+    def start_game(self):
+        game_mode = GameMode.SINGLE_PLAYER if self.game_mode_var.get() == "SINGLE_PLAYER" else GameMode.MULTI_PLAYER
+        self.show_game_ui(game_mode=game_mode)
 
     def show_game_ui(self, game_mode: GameMode):
         self.clear_window()
+
+        self.root.geometry("670x400")
+        self.root.minsize(670, 400)
+        main_container = tk.Frame(self.root)
+        main_container.pack(fill=tk.BOTH, expand=True)
+        main_container.grid_columnconfigure(0, weight=3, minsize=400)
+        main_container.grid_columnconfigure(1, weight=1, minsize=200)
+        main_container.grid_rowconfigure(0, weight=1)
+
         board = self._game_session_layer.start_game(game_mode)
         self.cells = np.zeros((board.width, board.height), dtype=int)
 
-        menu_frame = tk.Frame(self.root, bg="white")
-        menu_frame.pack(pady=10)
+        game_frame = tk.Frame(main_container, width=400, height=200)
+        game_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        game_frame.grid_propagate(False)
+
+        self.canvas = tk.Canvas(game_frame,
+                                width=400,
+                                height=400,
+                                bg="blue")
+        self.canvas.bind("<Button-1>", self.handle_cell_click)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        menu_frame = tk.Frame(main_container, width=200)
+        menu_frame.grid(row=0, column=1, padx=10, pady=10, sticky="ns")
+
+        btn_start_game = tk.Button(menu_frame,
+                                   text="Start New Game",
+                                   font=("Arial", 16),
+                                   bg="white",
+                                   width=12,
+                                   height=1,
+                                   command=self.display_menu_page)
+        btn_start_game.pack(pady=10)
 
         btn_restart = tk.Button(menu_frame,
-                                text="Restart",
+                                text="Restart Game",
                                 font=("Arial", 16),
                                 bg="white",
-                                fg="black",
                                 width=12,
                                 height=1,
                                 command=self.restart)
-        btn_restart.pack(side="left", padx=40)
+        btn_restart.pack(pady=10)
 
-        btn_exit = tk.Button(menu_frame,
-                             text="Exit",
-                             font=("Arial", 16),
-                             bg="white",
-                             fg="black",
-                             width=12,
-                             height=1,
-                             command=self.root.quit)
-        btn_exit.pack(side="left", padx=40)
+        spacer = tk.Frame(menu_frame)
+        spacer.pack(fill=tk.BOTH, expand=True)
 
-        btn_end = tk.Button(self.root,
-                            text="End Game",
-                            font=("Arial", 18),
-                            bg="white",
-                            fg="black",
-                            width=15,
-                            height=2,
-                            command=self.display_end_page)
-        btn_end.pack(pady=30)
+        if self._game_session_layer.is_multiplayer:
+            self.player_turn_label = tk.Label(
+                menu_frame,
+                text="Player Turn: Player 1",
+                font=("Arial", 10),
+                justify=tk.LEFT
+            )
+            self.player_turn_label.pack(side=tk.BOTTOM, pady=15)
 
-        label = tk.Label(self.root,
-                         text=f"{game_mode} - In Game",
-                         font=("Arial", 22),
-                         fg="black",
-                         bg="white")
-        label.pack(pady=20)
+        player_legend_yellow_text = tk.Label(
+            menu_frame,
+            text="Player 2" if self._game_session_layer.is_multiplayer else "Monte Carlo AI",
+            font=("Arial", 10),
+            fg="yellow",
+            justify=tk.LEFT
+        )
+        player_legend_yellow_text.pack(side=tk.BOTTOM)
 
-        self.canvas = tk.Canvas(self.root,
-                                width=700,
-                                height=600,
-                                bg="white",
-                                highlightthickness=0)
-        self.canvas.bind("<Button-1>", self.handle_cell_click)
-        self.canvas.pack()
+        player_legend_red_text = tk.Label(
+            menu_frame,
+            text="Player 1",
+            font=("Arial", 10),
+            highlightcolor="red",
+            fg="red",
+            justify=tk.LEFT
+        )
+        player_legend_red_text.pack(side=tk.BOTTOM)
 
         self.display_board()
 
     def restart(self):
         self.show_game_ui(self._game_session_layer.game_mode)
 
+    def update_player_turn_label(self):
+        current = "Player 1" if self._game_session_layer.current_player == PLAYER_1 else "Player 2"
+        self.player_turn_label.config(text=f"Player Turn: {current}")
+
     def display_board(self):
         for x in range(len(self.cells[0])):
             for y in range(len(self.cells)):
-                x1, y1 = y * self.cell_size + 10, x * self.cell_size + 10
-                x2, y2 = x1 + self.cell_size, y1 + self.cell_size
+                x1 = y * (self.cell_size + self.cell_padding) + 10
+                y1 = x * (self.cell_size + self.cell_padding) + 10
+                x2 = x1 + self.cell_size
+                y2 = y1 + self.cell_size
 
-                self.cells[y, x] = self.canvas.create_oval(x1, y1, x2, y2, fill="gray", outline="white")
+                self.cells[y, x] = self.canvas.create_oval(x1, y1, x2, y2, fill="white")
 
     def handle_cell_click(self, event):
         # Convert click coordinates to grid position
-        x = event.x // self.cell_size
+        x = event.x // (self.cell_size + self.cell_padding)
 
         if 0 <= x <= len(self.cells[0]):
             move_result = self._game_session_layer.move(x)
@@ -140,11 +173,13 @@ class UILayer:
                 fill = "red" if player == PLAYER_1 else "yellow"
                 self.canvas.itemconfig(self.cells[x, y], fill=fill)
 
-            if move_result.is_over:
-                self.final_result = move_result
-                self.display_end_page()
+            if self._game_session_layer.is_multiplayer:
+                self.update_player_turn_label()
 
-    def display_end_page(self):
+            if move_result.is_over:
+                self.display_end_page(move_result)
+
+    def display_end_page(self, result: MoveResult):
         self.clear_window()
         board = self._game_session_layer.end_game()
         self.cells = np.zeros((board.width, board.height), dtype=int)
@@ -152,45 +187,41 @@ class UILayer:
         label = tk.Label(self.root,
                          text="Game Over",
                          font=("Arial", 28),
-                         fg="black",
-                         bg="white")
+                         fg="black")
         label.pack(pady=30)
 
-        text = "Game ended"
-        if self.final_result is not None:
-            if self.final_result.is_draw:
-                text = "Draw!"
-            elif self.final_result.game_mode == GameMode.MULTI_PLAYER:
-                text = "Player 1 Wins!" if self.final_result.winner == PLAYER_1 else "Player 2 Wins!"
-            else:
-                text = "You Win!" if self.final_result.winner == PLAYER_1 else "You Lose!"
+        if result.is_draw:
+            text = "Draw!"
+        elif result.game_mode == GameMode.MULTI_PLAYER:
+            text = "Player 1 Wins!" if result.winner == PLAYER_1 else "Player 2 Wins!"
+        else:
+            text = "You Win!" if result.winner == PLAYER_1 else "You Lose!"
 
         winner_label = tk.Label(self.root,
                                 text=text,
                                 font=("Arial", 22),
-                                fg="black",
-                                bg="white")
+                                fg="red" if result.winner == PLAYER_1 else "yellow")
         winner_label.pack(pady=10)
 
-        btn_restart = tk.Button(self.root,
-                                text="Back",
+        start_btn = tk.Button(self.root,
+                                text="Start New Game",
                                 font=("Arial", 18),
                                 bg="white",
                                 fg="black",
                                 width=15,
                                 height=2,
                                 command=self.display_menu_page)
-        btn_restart.pack(pady=15)
+        start_btn.pack(pady=15)
 
-        btn_exit = tk.Button(self.root,
-                             text="Exit",
+        replay_btn = tk.Button(self.root,
+                             text="Replay",
                              font=("Arial", 18),
                              bg="white",
                              fg="black",
                              width=15,
                              height=2,
-                             command=self.root.quit)
-        btn_exit.pack(pady=15)
+                             command=self.restart)
+        replay_btn.pack(pady=15)
 
     def clear_window(self):
         for widget in self.root.winfo_children():

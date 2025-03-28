@@ -38,6 +38,14 @@ class GameSessionLayer:
     def game_mode(self):
         return self._game_mode
 
+    @property
+    def is_multiplayer(self):
+        return self._game_mode == GameMode.MULTI_PLAYER
+
+    @property
+    def current_player(self):
+        return self._current_player
+
     def start_game(self, game_mode: GameMode) -> Board:
         self._game_mode = game_mode
         self._current_player = PLAYER_1
