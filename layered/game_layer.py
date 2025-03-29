@@ -32,31 +32,42 @@ class Board:
 
 class GameLayer:
     """Maintains board state and validates moves against game rules"""
-    def __init__(self):
-        self._dims = (6, 7)
-        self._board = Board(np.full(self._dims, UNOCCUPIED, dtype=int))
-        self._winner = None
-        self._is_draw = False
 
-    def reset_board(self) -> Board:
-        self._board = Board(np.full(self._dims, UNOCCUPIED, dtype=int))
+    def __init__(self):
+        self._board = self._create_board()
         self._winner = None
-        self._is_draw = False
-        return self._board
+
+    def reset(self):
+        """Reset game state"""
+        self._board = self._create_board()
+        self._winner = None
 
     @property
-    def winner(self):
+    def winner(self) -> int | None:
+        """Returns winning player # if exists"""
         return self._winner
 
     @property
-    def is_draw(self):
-        return self._winner is None and np.count_nonzero(self._board.grid == 0) == UNOCCUPIED
+    def is_draw(self) -> bool:
+        """Returns whether the game ended in a draw"""
+        all_occupied = np.count_nonzero(self._board.grid == UNOCCUPIED) == 0
+        return self._winner is None and all_occupied
 
     @property
-    def is_over(self):
-        return self._is_draw or self._winner is not None
+    def is_over(self) -> bool:
+        """Returns whether the game is over (draw or winner)"""
+        return self._winner is not None or self.is_draw
+
+    @property
+    def open_moves(self) -> list[int]:
+        """Returns list of playable columns (for use by AI agent)"""
+        return [x for x in range(self._board.width)
+                if np.count_nonzero(self._board.grid[:, x] == UNOCCUPIED) > 0]
 
     def move(self, player: int, x: int) -> int:
+        """Validates the move, updates state, and checks for winner
+            Returns the row in which the move was applied"""
+
         if self.is_over:
             raise Exception("Game is over")
 
@@ -64,6 +75,7 @@ class GameLayer:
         if np.count_nonzero(self._board.grid[:, x] == UNOCCUPIED) == 0:
             raise Exception("Illegal move")
 
+        # apply move in first available row within column
         y = np.where(self._board.grid[:, x] == UNOCCUPIED)[0][-1]
         self._board.apply_move(player, x, y)
 
@@ -89,8 +101,11 @@ class GameLayer:
              0 <= x + n < self._board.width and 0 <= y - n < self._board.height]
         ]
 
-        # check for winner
+        # check adjacent rows for a winner
         for row in rows:
+            if self._winner is not None:
+                break
+
             if len(row) < 4 or row[len(row) // 2] != player:
                 continue  # player must occupy middle to win horizontally
 
@@ -105,24 +120,20 @@ class GameLayer:
                     self._winner = player
                     break
 
-            if self._winner is not None:
-                break
-
         return y
-
-    @property
-    def open_moves(self):
-        return [x for x in range(self._board.width)
-                if np.count_nonzero(self._board.grid[:, x] == UNOCCUPIED) > 0]
 
     def simulate_move(self, player: int, x: int):
         """Simulates a move. Does not modify existing board state"""
         game_copy = GameLayer()
-        game_copy._board = self._board.copy()
         game_copy._winner = self._winner
-        game_copy._is_draw = self._is_draw
+        game_copy._board = self._board.copy()
 
-        if not game_copy.is_over:
+        if not game_copy.is_over:  # applies move if board has open moves
             game_copy.move(player, x)
 
         return game_copy
+
+    @staticmethod
+    def _create_board() -> Board:
+        """Returns empty board"""
+        return Board(np.full((6, 7), UNOCCUPIED, dtype=int))

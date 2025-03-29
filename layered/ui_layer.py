@@ -9,9 +9,6 @@ class UILayer(tk.Frame):
         self.root = tk.Tk()
         self.root.title("Connect 4 - Layered")
 
-        # initiate adjacent layer
-        self._game_session_layer = GameSessionLayer()
-
         # menu page fields/components
         self.game_mode_var = None
 
@@ -21,6 +18,8 @@ class UILayer(tk.Frame):
         self.cell_size = 50
         self.cell_padding = 10
         self.player_turn_label = None
+
+        self._game_session_layer = GameSessionLayer()
 
     def display_menu_page(self):
         """Display menu page with options to start a game"""
@@ -73,14 +72,19 @@ class UILayer(tk.Frame):
         start_btn.pack(pady=20)
 
     def handle_start_click(self):
-        # transform radio button TextVar to GameMode enum
+        """handle start click event
+            transform radio button TextVar to GameMode enum"""
         game_mode_text = self.game_mode_var.get()
         game_mode = GameMode.SINGLE_PLAYER if game_mode_text == "SINGLE_PLAYER" else GameMode.MULTI_PLAYER
 
         self.display_game(game_mode=game_mode)
 
     def display_game(self, game_mode: GameMode):
+        """display game board"""
         self.clear_window()
+
+        # start session as player 1
+        self._game_session_layer.start_session(game_mode=game_mode)
 
         self.root.geometry("670x400")
         self.root.minsize(670, 400)
@@ -90,8 +94,7 @@ class UILayer(tk.Frame):
         main_container.grid_columnconfigure(1, weight=1, minsize=200)
         main_container.grid_rowconfigure(0, weight=1)
 
-        board = self._game_session_layer.start_game(game_mode)
-        self.cells = np.zeros((board.width, board.height), dtype=int)
+        self.cells = np.zeros((7, 6), dtype=int)
 
         game_frame = tk.Frame(main_container, width=400, height=200)
         game_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
@@ -128,7 +131,8 @@ class UILayer(tk.Frame):
         spacer = tk.Frame(menu_frame)
         spacer.pack(fill=tk.BOTH, expand=True)
 
-        if self._game_session_layer.is_multiplayer:
+        # show player turn indicator for multiplayer mode
+        if game_mode == GameMode.MULTI_PLAYER:
             self.player_turn_label = tk.Label(
                 menu_frame,
                 text="Player Turn: Player 1",
@@ -159,13 +163,18 @@ class UILayer(tk.Frame):
         self.display_board()
 
     def handle_restart_click(self):
-        self.display_game(self._game_session_layer.game_mode)
+        self._game_session_layer.restart_session()
+        self.cells = np.zeros((7, 6), dtype=int)
+        self.display_board()
 
     def update_player_turn_label(self):
+        """Generate turn label"""
         current = "Player 1" if self._game_session_layer.current_player == PLAYER_1 else "Player 2"
         self.player_turn_label.config(text=f"Player Turn: {current}")
 
     def display_board(self):
+        """Display board view, render cells"""
+
         for x in range(len(self.cells[0])):
             for y in range(len(self.cells)):
                 x1 = y * (self.cell_size + self.cell_padding) + 10
@@ -176,6 +185,8 @@ class UILayer(tk.Frame):
                 self.cells[y, x] = self.canvas.create_oval(x1, y1, x2, y2, fill="white")
 
     def handle_cell_click(self, event):
+        """Handle game cell clicked event"""
+
         # Convert click coordinates to grid position
         x = event.x // (self.cell_size + self.cell_padding)
 
@@ -192,9 +203,9 @@ class UILayer(tk.Frame):
                 self.display_end_page(move_result)
 
     def display_end_page(self, result: MoveResult):
+        """Display end page for a given result"""
         self.clear_window()
-        board = self._game_session_layer.end_game()
-        self.cells = np.zeros((board.width, board.height), dtype=int)
+        self.cells = np.zeros((7, 6), dtype=int)
 
         label = tk.Label(self.root,
                          text="Game Over",
@@ -204,10 +215,16 @@ class UILayer(tk.Frame):
 
         if result.is_draw:
             text = "Draw!"
-        elif self._game_session_layer.game_mode == GameMode.MULTI_PLAYER:
-            text = "Player 1 Wins!" if result.winner == PLAYER_1 else "Player 2 Wins!"
+        elif self._game_session_layer.is_multiplayer:
+            if result.winner == PLAYER_1:
+                text = "Player 1 Wins!"
+            else:
+                text = "Player 2 Wins!"
         else:
-            text = "You Win!" if result.winner == PLAYER_1 else "You Lose!"
+            if result.winner == PLAYER_1:
+                text = "You Win!"
+            else:
+                text = "You Lose!"
 
         winner_label = tk.Label(self.root,
                                 text=text,
@@ -236,9 +253,11 @@ class UILayer(tk.Frame):
         replay_btn.pack(pady=15)
 
     def clear_window(self):
+        """Destroy existing widgets in tkinter root"""
         for widget in self.root.winfo_children():
             widget.destroy()
 
     def draw(self):
+        """Present menu and start game loop"""
         self.display_menu_page()
         self.root.mainloop()
