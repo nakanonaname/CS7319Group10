@@ -71,15 +71,7 @@ class UILayer(tk.Frame):
                                  command=self.handle_start_click)
         start_btn.pack(pady=20)
 
-    def handle_start_click(self):
-        """handle start click event
-            transform radio button TextVar to GameMode enum"""
-        game_mode_text = self.game_mode_var.get()
-        game_mode = GameMode.SINGLE_PLAYER if game_mode_text == "SINGLE_PLAYER" else GameMode.MULTI_PLAYER
-
-        self.display_game(game_mode=game_mode)
-
-    def display_game(self, game_mode: GameMode):
+    def display_game_page(self, game_mode: GameMode):
         """display game board"""
         self.clear_window()
 
@@ -160,47 +152,7 @@ class UILayer(tk.Frame):
         )
         player_legend_red_text.pack(side=tk.BOTTOM)
 
-        self.display_board()
-
-    def handle_restart_click(self):
-        self._game_session_layer.restart_session()
-        self.cells = np.zeros((7, 6), dtype=int)
-        self.display_board()
-
-    def update_player_turn_label(self):
-        """Generate turn label"""
-        current = "Player 1" if self._game_session_layer.current_player == PLAYER_1 else "Player 2"
-        self.player_turn_label.config(text=f"Player Turn: {current}")
-
-    def display_board(self):
-        """Display board view, render cells"""
-
-        for x in range(len(self.cells[0])):
-            for y in range(len(self.cells)):
-                x1 = y * (self.cell_size + self.cell_padding) + 10
-                y1 = x * (self.cell_size + self.cell_padding) + 10
-                x2 = x1 + self.cell_size
-                y2 = y1 + self.cell_size
-
-                self.cells[y, x] = self.canvas.create_oval(x1, y1, x2, y2, fill="white")
-
-    def handle_cell_click(self, event):
-        """Handle game cell clicked event"""
-
-        # Convert click coordinates to grid position
-        x = event.x // (self.cell_size + self.cell_padding)
-
-        if 0 <= x <= len(self.cells[0]):
-            move_result = self._game_session_layer.move(x)
-            for (x, y, player) in move_result.moves:
-                fill = "red" if player == PLAYER_1 else "yellow"
-                self.canvas.itemconfig(self.cells[x, y], fill=fill)
-
-            if self._game_session_layer.is_multiplayer:
-                self.update_player_turn_label()
-
-            if move_result.is_over:
-                self.display_end_page(move_result)
+        self.display_board_widget()
 
     def display_end_page(self, result: MoveResult):
         """Display end page for a given result"""
@@ -251,6 +203,54 @@ class UILayer(tk.Frame):
                              height=2,
                              command=self.handle_restart_click)
         replay_btn.pack(pady=15)
+
+    def display_board_widget(self):
+        """Display board view, render cells"""
+
+        for x in range(len(self.cells[0])):
+            for y in range(len(self.cells)):
+                x1 = y * (self.cell_size + self.cell_padding) + 10
+                y1 = x * (self.cell_size + self.cell_padding) + 10
+                x2 = x1 + self.cell_size
+                y2 = y1 + self.cell_size
+
+                self.cells[y, x] = self.canvas.create_oval(x1, y1, x2, y2, fill="white")
+
+    def handle_start_click(self):
+        """handle start click event
+            transform radio button TextVar to GameMode enum"""
+        game_mode_text = self.game_mode_var.get()
+        game_mode = GameMode.SINGLE_PLAYER if game_mode_text == "SINGLE_PLAYER" else GameMode.MULTI_PLAYER
+
+        self.display_game_page(game_mode=game_mode)
+
+    def handle_restart_click(self):
+        self._game_session_layer.restart_session()
+        self.cells = np.zeros((7, 6), dtype=int)
+        self.display_board_widget()
+
+    def handle_cell_click(self, event):
+        """Handle game cell clicked event"""
+
+        # Convert click coordinates to grid position
+        x = event.x // (self.cell_size + self.cell_padding)
+
+        if 0 <= x <= len(self.cells[0]):
+            move_result = self._game_session_layer.move(x)
+            for (x, y, player) in move_result.moves:
+                fill = "red" if player == PLAYER_1 else "yellow"
+                self.canvas.itemconfig(self.cells[x, y], fill=fill)
+
+            if self._game_session_layer.is_multiplayer:
+                self.update_player_turn_label()
+
+            if move_result.is_over:
+                self.display_end_page(move_result)
+
+    def update_player_turn_label(self):
+        """Generate turn label"""
+        current = "Player 1" if self._game_session_layer.current_player == PLAYER_1 else "Player 2"
+        self.player_turn_label.config(text=f"Player Turn: {current}")
 
     def clear_window(self):
         """Destroy existing widgets in tkinter root"""
