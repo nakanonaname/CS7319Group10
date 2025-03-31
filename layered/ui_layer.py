@@ -226,8 +226,7 @@ class UILayer(tk.Frame):
 
     def handle_restart_click(self):
         self._game_session_layer.restart_session()
-        self.cells = np.zeros((7, 6), dtype=int)
-        self.display_board_widget()
+        self.display_game_page(self._game_session_layer.game_mode)
 
     def handle_cell_click(self, event):
         """Handle game cell clicked event"""
