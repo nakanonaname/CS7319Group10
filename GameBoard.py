@@ -12,11 +12,14 @@ class GameBoard(tk.Canvas):
         self.start_new_game_callback = start_new_game_callback
         self.restart_game_callback = restart_game_callback
         self.app_ref = app_ref
+        self.colors = self.blackboard.selected_colors if hasattr(self.blackboard, "selected_colors") else {}
 
         self.create_widgets()
 
     def create_widgets(self):
-        self.canvas = tk.Canvas(self, bg='blue', height=360, width=420)
+        bg_color = self.colors.get("background_color", "blue")
+        self.canvas = tk.Canvas(self, bg=bg_color, height=360, width=420)
+
         self.canvas.pack(side=tk.LEFT, padx=(10, 0))
         self.draw_board()
 
@@ -29,13 +32,13 @@ class GameBoard(tk.Canvas):
         self.restart_button = tk.Button(self.right_side_frame, text="Restart Game", command=self.restart_game)
         self.restart_button.pack(pady=10)
 
-        self.player_turn_label = tk.Label(self, text="Yellow's turn")
+        self.player_turn_label = tk.Label(self, text="player 1's turn")
         self.player_turn_label.pack(side=tk.BOTTOM, pady=(10, 10))
 
         self.canvas.bind("<Button-1>", self.on_board_click)
 
     def update_player_turn_label(self):
-        player_color = "Yellow" if self.blackboard.current_player == 1 else "Red"
+        player_color = "player 1" if self.blackboard.current_player == 1 else "player 2"
         self.player_turn_label.config(text=f"{player_color}'s turn")
 
     def draw_board(self, winning_positions=None):
@@ -52,9 +55,11 @@ class GameBoard(tk.Canvas):
                 color = "white"
 
                 if self.blackboard.board[row][col] == 1:
-                    color = "yellow"
+                    color = self.colors.get("player1_color", "player 1")
                 elif self.blackboard.board[row][col] == 2:
-                    color = "red"
+                    color = self.colors.get("player2_color", "player 2")
+                else:
+                    color = self.colors.get("board_color", "white")
 
                 self.canvas.create_oval(x0 + 10, y0 + 10, x1 - 10, y1 - 10, fill=color, tags="token")
 
@@ -130,3 +135,4 @@ class GameBoard(tk.Canvas):
 
     def start_new(self):
         self.start_new_game_callback()
+
