@@ -5,7 +5,7 @@ class WinnerDisplay(tk.Frame):
         super().__init__(parent, padx=30, pady=30)
         self.pack()
 
-        winner_text = "Player 1 - Yellow wins!" if winner == 1 else "Player 2 - Red wins!" if winner == 2 else "It's a draw!"
+        winner_text = "Player 1 - player 1 wins!" if winner == 1 else "Player 2 - player 2 wins!" if winner == 2 else "It's a draw!"
         self.label = tk.Label(self, text=winner_text, font=("Helvetica", 24))
         self.label.pack(pady=20)
 
