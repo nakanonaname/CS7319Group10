@@ -3,11 +3,16 @@ from StartMenu import StartMenu
 from GameBoard import GameBoard
 from WinnerDisplay import WinnerDisplay
 from Blackboard import Blackboard
+from ColorSelector import ColorSelector
 
 class Connect4App:
     def __init__(self, root, blackboard):
         self.root = root
-        self.start_menu = StartMenu(root, self.start_game)
+        self.start_menu = StartMenu(
+            root,
+            start_game_callback=self.start_game,
+            open_color_selector_callback=self.open_color_selector
+        )
         self.start_menu.pack()
         self.blackboard = blackboard
         self.game_board = None
@@ -26,6 +31,19 @@ class Connect4App:
         self.game_board.pack()
         # Hide the start menu ui 
         self.start_menu.pack_forget()
+
+    def open_color_selector(self, opponent):
+        self.start_menu.pack_forget()
+        self.color_selector = ColorSelector(
+            self.root,
+            on_done_callback=lambda colors: self.receive_colors_and_start_game(opponent, colors)
+        )
+        self.color_selector.pack()
+
+    def receive_colors_and_start_game(self, opponent, colors):
+        self.blackboard.selected_colors = colors  # 保存用户选择的颜色
+        self.color_selector.pack_forget()
+        self.start_game(opponent)
 
     def start_new_game(self):
         """Resets the game and brings back the start menu."""
