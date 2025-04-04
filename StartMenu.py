@@ -1,38 +1,70 @@
 import tkinter as tk
+import random
 
 class StartMenu(tk.Frame):
-    def __init__(self, parent, start_game_callback):
+    def __init__(self, parent, start_game_callback, open_color_selector_callback=None):
         super().__init__(parent)
         self.parent = parent
         self.start_game_callback = start_game_callback
+        self.open_color_selector_callback = open_color_selector_callback
 
-        self.pack(padx=30, pady=30)
+        self.canvas = tk.Canvas(self, width=500, height=500, bg="black", highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
 
-        self.title_frame = tk.Frame(self)
-        self.title_frame.pack(pady=20)
+        self.particles = []
+        self.animate_particles()
 
-        self.title_connect = tk.Label(self.title_frame, text="Connect", fg="red", font=("Helvetica", 24, "bold"))
-        self.title_connect.pack(side=tk.LEFT)
+        self.title_label = tk.Label(self.parent, text="Connect-4", font=("Helvetica", 28, "bold"),
+                                    fg="white", bg="black")
+        self.canvas.create_window(250, 60, window=self.title_label)
 
-        self.title_four = tk.Label(self.title_frame, text="-4", fg="yellow", font=("Helvetica", 24, "bold"))
-        self.title_four.pack(side=tk.LEFT)
-
-        self.label = tk.Label(self, text="Choose your opponent:", font=("Helvetica", 14))
-        self.label.pack(pady=20)
+        self.label = tk.Label(self.parent, text="Mpde::", font=("Helvetica", 14),
+                              fg="white", bg="black")
+        self.canvas.create_window(250, 130, window=self.label)
 
         self.opponent_var = tk.StringVar(value="Monte Carlo AI")
-        self.opponents = ["Monte Carlo AI", "2 Players"]
+        self.radio_frame = tk.Frame(self.parent, bg="black")
 
-        self.radio_frame = tk.Frame(self)
-        self.radio_frame.pack(pady=10)
+        radio1 = tk.Radiobutton(self.radio_frame, text="Monte Carlo AI", variable=self.opponent_var,
+                                value="Monte Carlo AI", font=("Helvetica", 12),
+                                bg="black", fg="white", selectcolor="gray")
+        radio2 = tk.Radiobutton(self.radio_frame, text="2 Players", variable=self.opponent_var,
+                                value="2 Players", font=("Helvetica", 12),
+                                bg="black", fg="white", selectcolor="gray")
 
-        for opponent in self.opponents:
-            radio_button = tk.Radiobutton(self.radio_frame, text=opponent, variable=self.opponent_var, value=opponent, font=("Helvetica", 12))
-            radio_button.pack(anchor=tk.W, pady=5)
+        radio1.pack(anchor=tk.W, pady=5)
+        radio2.pack(anchor=tk.W, pady=5)
+        self.canvas.create_window(250, 180, window=self.radio_frame)
 
-        self.start_button = tk.Button(self, text="Start Game", font=("Helvetica", 14), command=self.on_start)
-        self.start_button.pack(pady=20)
+        self.start_button = tk.Button(self.parent,
+                                      text="Start",
+                                      font=("Helvetica", 14),
+                                      command=self.on_start)
+        self.canvas.create_window(250, 260, window=self.start_button)
+
+    def animate_particles(self):
+        self.canvas.delete("particles")
+
+        if random.random() < 0.3:
+            x = random.randint(0, 500)
+            size = random.randint(2, 4)
+            color = random.choice(["#5555ff", "#7777ff", "#9999ff"])
+            self.particles.append([x, 0, size, color])
+
+        updated_particles = []
+        for x, y, r, color in self.particles:
+            y += 2
+            if y < 500:
+                self.canvas.create_oval(x - r, y - r, x + r, y + r,
+                                        fill=color, outline="", tags="particles")
+                updated_particles.append([x, y, r, color])
+
+        self.particles = updated_particles
+        self.after(30, self.animate_particles)
 
     def on_start(self):
-        chosen_opponent = self.opponent_var.get()
-        self.start_game_callback(chosen_opponent)
+        opponent = self.opponent_var.get()
+        if self.open_color_selector_callback:
+            self.open_color_selector_callback(opponent)
+        else:
+            self.start_game_callback(opponent)
