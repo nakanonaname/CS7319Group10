@@ -28,11 +28,14 @@ class UILayer(tk.Frame):
         self._game_session_layer = GameSessionLayer()
 
     def animate_particles(self):
-        if not self.canvas:
+        if not self.canvas or not self.canvas.winfo_exists():
             self.root.after(50, self.animate_particles)
             return
 
-        self.canvas.delete("particles")
+        try:
+            self.canvas.delete("particles")
+        except tk.TclError:
+            return
 
         if random.random() < 0.3:
             x = random.randint(0, 400)
