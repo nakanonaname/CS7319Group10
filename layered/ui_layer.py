@@ -208,7 +208,6 @@ class UILayer(tk.Frame):
         self.canvas.pack(fill="both", expand=True)
         self.animate_particles()
 
-        # 初始化颜色（默认）
         self.player1_color = "#ff3333"
         self.player2_color = "#3333ff"
         self.board_color = "#f0f0f0"
@@ -222,19 +221,19 @@ class UILayer(tk.Frame):
 
         buttons = {}
 
-        buttons["player1_color"] = tk.Button(self.root, text="player 1 color", bg=self.player1_color,
+        buttons["player1_color"] = tk.Button(self.root, text="player 1 color", bg="white",
                                              command=lambda: choose_color("player 1 color", "player1_color"))
         self.canvas.create_window(250, 80, window=buttons["player1_color"])
 
-        buttons["player2_color"] = tk.Button(self.root, text="player 2 color", bg=self.player2_color,
+        buttons["player2_color"] = tk.Button(self.root, text="player 2 color", bg="white",
                                              command=lambda: choose_color("player 2 color", "player2_color"))
         self.canvas.create_window(250, 130, window=buttons["player2_color"])
 
-        buttons["board_color"] = tk.Button(self.root, text="board color", bg=self.board_color,
+        buttons["board_color"] = tk.Button(self.root, text="board color", bg="white",
                                            command=lambda: choose_color("board color", "board_color"))
         self.canvas.create_window(250, 180, window=buttons["board_color"])
 
-        buttons["background_color"] = tk.Button(self.root, text="background color", bg=self.background_color,
+        buttons["background_color"] = tk.Button(self.root, text="background color", bg="white",
                                                 command=lambda: choose_color("background color", "background_color"))
         self.canvas.create_window(250, 230, window=buttons["background_color"])
 
