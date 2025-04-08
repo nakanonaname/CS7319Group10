@@ -20,6 +20,8 @@ class ColorSelector(tk.Frame):
         def set_button_text_color(button, bg_color):
             if bg_color.lower() == "#000000":
                 button.configure(fg="white")
+            else:
+                button.configure(fg="black")
 
         def choose_color(label, key):
             color = colorchooser.askcolor(title=f"choose {label}")[1]
@@ -50,3 +52,4 @@ class ColorSelector(tk.Frame):
 
     def start_game(self):
         self.on_done_callback(self.colors)
+
