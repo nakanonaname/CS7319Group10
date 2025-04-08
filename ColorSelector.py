@@ -18,10 +18,17 @@ class ColorSelector(tk.Frame):
         }
 
         def choose_color(label, key):
-            color = colorchooser.askcolor(title=f"选择 {label}")[1]
+            color = colorchooser.askcolor(title=f"choose {label}")[1]
             if color:
                 self.colors[key] = color
                 buttons[key].configure(bg=color)
+
+                r, g, b = self.winfo_rgb(color)
+                brightness = (r + g + b) / 3
+                if brightness < 65535:
+                    buttons[key].configure(fg="white")
+                else:
+                    buttons[key].configure(fg="black")
 
         y = 80
         buttons = {}
