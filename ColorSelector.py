@@ -18,10 +18,8 @@ class ColorSelector(tk.Frame):
         }
 
         def set_button_text_color(button, bg_color):
-            if bg_color.lower() == "#000000":
-                button.configure(fg="white")
-            else:
-                button.configure(fg="black")
+
+            button.configure(fg="black")
 
         def choose_color(label, key):
             color = colorchooser.askcolor(title=f"choose {label}")[1]
@@ -39,7 +37,7 @@ class ColorSelector(tk.Frame):
             ("board color", "board_color"),
             ("background color", "background_color")
         ]:
-            btn = tk.Button(self.parent, text=label, bg=self.colors[key],
+            btn = tk.Button(self.parent, text=label, bg="white",
                             command=lambda l=label, k=key: choose_color(l, k))
             set_button_text_color(btn, self.colors[key])
             self.canvas.create_window(250, y, window=btn)
