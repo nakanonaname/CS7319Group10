@@ -18,7 +18,7 @@ class StartMenu(tk.Frame):
                                     fg="white", bg="black")
         self.canvas.create_window(250, 60, window=self.title_label)
 
-        self.label = tk.Label(self.parent, text="Mpde::", font=("Helvetica", 14),
+        self.label = tk.Label(self.parent, text="Mode:", font=("Helvetica", 14),
                               fg="white", bg="black")
         self.canvas.create_window(250, 130, window=self.label)
 
