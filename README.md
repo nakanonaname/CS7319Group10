@@ -82,7 +82,7 @@ A fully-featured desktop Connect-4 game built in **Python** using **Tkinter**, s
 To run the Blackboard architecture Connect4 game:
 
   * cd to the project root directory
-  * run `python unselected/Connect4App.py`
+  * run `python Unselected/Connect4App.py`
 
 ### Layered
 
@@ -90,4 +90,4 @@ To run the Blackboard architecture Connect4 game:
 To run the Layered architecture Connect4 game:
 
   * cd to the project root directory
-  * run `python selected/main.py`
+  * run `python Selected/main.py`
