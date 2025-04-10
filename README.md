@@ -67,4 +67,27 @@ A fully-featured desktop Connect-4 game built in **Python** using **Tkinter**, s
 - Monte Carlo Search Algorithm
 - UML & Software Architecture (Blackboard & Layered)
 
+
 ---
+
+## Running the Implementations
+
+### Install Dependencies
+
+* tkinter
+* numpy
+
+### Blackboard
+
+To run the Blackboard architecture Connect4 game:
+
+  * cd to the project root directory
+  * run `python unselected/Connect4App.py`
+
+### Layered
+
+
+To run the Layered architecture Connect4 game:
+
+  * cd to the project root directory
+  * run `python selected/main.py`
