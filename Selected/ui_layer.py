@@ -180,24 +180,6 @@ class UILayer(tk.Frame):
             )
             self.player_turn_label.pack(side=tk.BOTTOM, pady=15)
 
-        player_legend_yellow_text = tk.Label(
-            menu_frame,
-            text="Player 2" if self._game_session_layer.is_multiplayer else "Monte Carlo AI",
-            font=(FONT, 10),
-            fg="yellow",
-            justify=tk.LEFT
-        )
-        player_legend_yellow_text.pack(side=tk.BOTTOM)
-
-        player_legend_red_text = tk.Label(
-            menu_frame,
-            text="Player 1",
-            font=(FONT, 10),
-            highlightcolor="red",
-            fg="red",
-            justify=tk.LEFT
-        )
-        player_legend_red_text.pack(side=tk.BOTTOM)
 
         self.display_board_widget()
 
