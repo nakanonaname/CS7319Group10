@@ -37,6 +37,56 @@ A fully-featured desktop Connect-4 game built in **Python** using **Tkinter**, s
 - Ideal for collaborative development and future expansion
 
 ---
+##  Architecture Comparison & Rationale
+
+###  Blackboard Architecture
+
+The **Blackboard architecture** organizes components around a shared data structure — the "blackboard" — where each component can read from and write to the shared state independently. This design promotes **parallelism**, **loose coupling**, and **modularity**, making it easier to develop and test components in isolation.
+
+**Advantages:**
+- Concurrency & Parallelism:  Enables components (e.g., AI, move checker, validator) to work independently and potentially in parallel — improving responsiveness.
+- Reusability: Components like MonteCarlo, WinChecker, and MoveProcessor are loosely coupled and can be reused or swapped easily.
+- Modularity: Promotes modular development — each component (UI, AI, logic) can be built and tested in isolation.
+- Decoupling:  Components interact only via the blackboard — they are not directly connected, reducing interdependencies.
+- Scalability: The system supports easy integration of new features (e.g., new AI, advanced analytics) without altering the core logic.
+- Shared Data Access: Efficient mechanism for sharing game state across all modules (e.g., AI reads from the same source as the UI).
+
+**Drawbacks:**
+- High Dependency on Shared State: Components are dependent on the integrity of the blackboard — if the data is corrupted, all logic fails.
+- Concurrency & Synchronization Complexity: Parallel access to shared data requires careful synchronization to avoid race conditions or inconsistencies.
+- Single Point of Failure: The Blackboard is critical — if it crashes or becomes inconsistent, the entire game breaks.
+- Maintenance & Evolution Difficulty: As the system grows, managing and evolving interactions around the blackboard can become error-prone and hard to trace.
+- Performance Overhead: Synchronization and indirect communication may slow down system responsiveness in more complex implementations.
+- Debugging & Testing Challenges: Dynamic, indirect interactions between components and the blackboard make it hard to isolate bugs and test individual flows.
+
+---
+
+###  Layered Architecture  *(Final Choice)*
+
+The **Layered architecture** divides the system into separate layers. Each layer depends only on the layer directly beneath it, which ensures a clear separation of concerns and better system maintainability.
+
+**Advantages:**
+- here
+
+**Drawbacks:**
+- here
+
+---
+
+###  Final Selection Rationale
+
+After evaluating both architectural styles, we selected the **Layered architecture** for our final implementation. Although the Blackboard architecture offers strong modularity and concurrent processing — which is ideal for AI-driven or event-heavy applications — the simplicity and clarity of the Layered model aligned better with our project goals.
+
+Our rationale included:
+
+- **Maintainability**: Easier for team members to understand and modify
+- **Readability**: Code structure closely matches functional responsibilities
+- **Scalability**: New features (e.g., different AIs or UIs) can be added cleanly
+- **Project scope fit**: For a moderately complex game like Connect-4, the overhead of Blackboard didn’t justify the complexity
+
+The Layered architecture helped us keep the system **organized**, **testable**, and **easy to extend** — all critical factors for delivering a quality final product within our timeline.
+
+---
 
 ##  Functional Requirements
 
