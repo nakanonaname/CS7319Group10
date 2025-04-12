@@ -59,6 +59,8 @@ The **Blackboard architecture** organizes components around a shared data struct
 - Performance Overhead: Synchronization and indirect communication may slow down system responsiveness in more complex implementations.
 - Debugging & Testing Challenges: Dynamic, indirect interactions between components and the blackboard make it hard to isolate bugs and test individual flows.
 
+![image](https://github.com/user-attachments/assets/9f0190c9-397e-4264-916b-3869a3363a35)
+
 ---
 
 ###  Layered Architecture  *(Final Choice)*
@@ -74,6 +76,8 @@ The **Layered architecture** divides the system into separate layers. Each layer
 - Duplication of code: Sometimes it may be necessary to cache a projection of the return values in the upstream layers. For example, the UI layer had to persist a representation of the game board to draw the tkinter widget. This approach could cause out of sync issues as the system scales and number of layers increase.
 - Increased complexity for simple operations: Changes to the well defined interface require some additional boilerplate that may be tedious to scale and maintain. Changes to the MoveResult response DTO, for example, may require adjusting the UI layer to adjust to the change in interface. 
 - Latency between layers: If messages are passed between multiple layers, any latency introduced downstream is additive to the entire request flow. For example, if the Monte Carlo agent is prohibitively slow, the user experience will degrade due to the synchronous nature of calls between the UI and Game Session layer.
+
+![image](https://github.com/user-attachments/assets/04f9159f-a8ea-4f6b-86c7-1022d53ae863)
 
 ---
 
