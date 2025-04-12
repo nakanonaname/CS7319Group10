@@ -66,10 +66,14 @@ The **Blackboard architecture** organizes components around a shared data struct
 The **Layered architecture** divides the system into separate layers. Each layer depends only on the layer directly beneath it, which ensures a clear separation of concerns and better system maintainability.
 
 **Advantages:**
-- here
+- Readability: The simplicity and modularity of this architecture styles facilitates clear code that can be easily read and maintained over time.
+- Extensibility: The clear division between layers and abstraction offered through well-defined interfaces makes the architecture easy to extend and modify. For example, the Monte Carlo agent could be replaced with no impact to the UI or Game layers. Similarly, the application could be easily extended to support mobile/tablet experience by modifying the UI layer would changing the underlying services.
+- Separation of concerns: This architecture allows distributed teams, such as ours, to contribute effectively and in parallel. Team members were able to utilize their distinct strengths with particular technologies with confidence due to separation of concerns offered by the well defined interfaces and isolated layer components. 
 
 **Drawbacks:**
-- here
+- Duplication of code: Sometimes it may be necessary to cache a projection of the return values in the upstream layers. For example, the UI layer had to persist a representation of the game board to draw the tkinter widget. This approach could cause out of sync issues as the system scales and number of layers increase.
+- Increased complexity for simple operations: Changes to the well defined interface require some additional boilerplate that may be tedious to scale and maintain. Changes to the MoveResult response DTO, for example, may require adjusting the UI layer to adjust to the change in interface. 
+- Latency between layers: If messages are passed between multiple layers, any latency introduced downstream is additive to the entire request flow. For example, if the Monte Carlo agent is prohibitively slow, the user experience will degrade due to the synchronous nature of calls between the UI and Game Session layer.
 
 ---
 
@@ -124,8 +128,8 @@ The Layered architecture helped us keep the system **organized**, **testable**, 
 
 ### Install Dependencies
 
-* tkinter
-* numpy
+* `pip install tkinter`
+* `pip install numpy`
 
 ### Blackboard
 
@@ -135,7 +139,6 @@ To run the Blackboard architecture Connect4 game:
   * run `python Unselected/Connect4App.py`
 
 ### Layered
-
 
 To run the Layered architecture Connect4 game:
 
