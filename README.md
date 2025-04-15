@@ -96,6 +96,25 @@ The Layered architecture helped us keep the system **organized**, **testable**, 
 
 ---
 
+### Difference Between the Architecture Designs
+
+- **Blackboard Architecture**:  
+  Centralized data store (the “blackboard”) shared by independent modules. Suitable for AI-based and dynamic reasoning systems.
+
+- **Layered Architecture**:  
+  Organizes the system into layers (GUI, logic, data). Each layer provides services to the one above and consumes services from the one below.
+
+---
+
+## Changes from Project Proposal
+
+- Initially proposed **Blackboard Architecture**.
+- Implementation revealed excessive complexity for a real-time GUI-based game.
+- Switched to **Layered Architecture** for better structure and ease of management.
+- This change is documented here to reflect our final design decision.
+  
+---
+
 ##  Functional Requirements
 
 - Players can choose to play against two players or against AI.
@@ -148,3 +167,12 @@ To run the Layered architecture Connect4 game:
 
   * cd to the project root directory
   * run `python Selected/main.py`
+
+---
+
+## Additional Information for Grader
+
+- Design emphasizes **simplicity**, **modularity**, and **clarity**.
+- Tested on **Windows 11** and **macOS (Sequoia)**.
+- Minimal use of external libraries to ensure **portability** and **ease of grading**.
+
